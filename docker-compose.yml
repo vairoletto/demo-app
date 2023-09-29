@@ -1,0 +1,117 @@
+services:
+
+
+ 
+    frontend:
+        image: frontend
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - 8080:80
+    backoffice:
+        image: backoffice
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - 8888:80
+
+    db:
+        image: mariadb:10.5.8
+        restart: always
+        networks:
+            - virtual_nerd
+        environment:
+          MYSQL_ROOT_PASSWORD: 12345678
+          MYSQL_DATABASE: nerd
+          MYSQL_USER: nerdearla
+          MYSQL_PASSWORD: n3rdearla
+        ports:
+          - '3306:3306'
+        expose:
+          - '3306'
+        volumes:
+          - my-db:/var/lib/mysql
+    rabbitmq:
+        image: rabbitmq:3-management
+        restart: always
+        networks:
+            - virtual_nerd
+        environment:
+          RABBITMQ_DEFAULT_USER: nerd
+          RABBITMQ_DEFAULT_PASS: 12345678
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        volumes:
+          - ./rabbitmq/queue.config:/etc/rabbitmq/custom.config:ro
+
+    backend:
+        image: backend
+        environment:
+          local_ip: ${LOCAL_IP}
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - 3000:3000
+
+    mysql-service:
+        depends_on:
+            - db
+        image: mysql-service
+        environment:
+          local_ip: ${LOCAL_IP}
+        networks:
+            - virtual_nerd
+        ports:
+            - 3001:3001
+
+
+
+
+
+    producer:
+        depends_on:
+            - rabbitmq
+        image: producer
+        environment:
+          local_ip: ${LOCAL_IP}
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - "3003:3003"
+    producerpy:
+        depends_on:
+            - rabbitmq
+        image: producerpy
+        environment:
+          local_ip: ${LOCAL_IP}
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - "3004:3004"
+    consumer:
+        depends_on:
+            - rabbitmq
+        image: consumer
+        environment:
+          local_ip: ${LOCAL_IP}
+        restart: always
+        networks:
+            - virtual_nerd
+        ports:
+            - 3005:3005
+networks:
+  virtual_nerd:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/24
+          gateway: 10.0.0.1
+
+volumes:
+    my-db:

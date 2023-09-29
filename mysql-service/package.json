@@ -1,0 +1,14 @@
+{
+    "name": "mysql-service",
+    "version": "1.0.0",
+    "description": "MySQL Web Application",
+    "main": "app.js",
+    "dependencies": {
+      "mysql": "^2.18.1",
+      "express": "^4.17.1",
+      "body-parser": "^1.19.0",
+      "axios": "^0.21.1",
+      "cors": "^2.8.5"
+    }
+  }
+
