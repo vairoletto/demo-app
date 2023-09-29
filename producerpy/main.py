@@ -29,6 +29,17 @@ def send_to_rabbitmq(payload):
 async def send_to_queue(request: Request):
     try:
         payload = await request.json()
+
+        # Extract traceparent and tracestate headers
+        traceparent = request.headers.get('traceparent')
+        tracestate = request.headers.get('tracestate')
+
+        # Add traceparent and tracestate to payload headers
+        payload['headers'] = {
+            'traceparent': traceparent,
+            'tracestate': tracestate
+        }
+
         send_to_rabbitmq(payload)
         logging.info(f'Payload received: {payload}')
         return {
@@ -44,6 +55,7 @@ async def send_to_queue(request: Request):
             'message': error_msg,
             'payload': None
         }
+
 
 
 if __name__ == '__main__':

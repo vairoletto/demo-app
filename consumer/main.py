@@ -47,13 +47,21 @@ def receive_from_rabbitmq():
         connection.close() 
         return payload
 
-async def post_to_submit(payload, port, path):
+async def post_to_submit(payload, port, path, traceparent, tracestate):
     try:
         payload['port'] = port
         payload['path'] = path
         
         url = f"http://{local_ip}:3000/submit"
-        headers = {'Content-Type': 'application/json'}
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        # Add traceparent and tracestate if available
+        if traceparent is not None:
+            headers['traceparent'] = traceparent
+        if tracestate is not None:
+            headers['tracestate'] = tracestate
         
         response = httpx.post(url, headers=headers, json=payload)
         response.raise_for_status()
@@ -101,9 +109,15 @@ async def save_and_get_from_queue():
             }
         else:
             payload = json.loads(result.decode('utf-8'))
+            traceparent = None
+            tracestate = None
+
+            if 'headers' in payload:
+                traceparent = payload['headers'].get('traceparent')
+                tracestate = payload['headers'].get('tracestate')
 
             # Add code to post payload to http://localhost:3000/submit
-            submit_response = await post_to_submit(payload, '3001', '/save')
+            submit_response = await post_to_submit(payload, '3001', '/save', traceparent, tracestate)
 
             return {
                 'status': 200,
@@ -118,6 +132,7 @@ async def save_and_get_from_queue():
             'message': error_msg,
             'payload': None
         }
+
 
 
 
