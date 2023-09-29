@@ -1,6 +1,6 @@
 # frontend-web/Dockerfile
 
-FROM node:14
+FROM node:16
 
 WORKDIR /usr/src/app
 
@@ -11,5 +11,10 @@ RUN npm install
 COPY . .
 
 EXPOSE 3001
+
+# Add New Relic Config Variables
+ENV NEW_RELIC_NO_CONFIG_FILE=true
+ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+ENV NEW_RELIC_LOG=stdout
 
 CMD ["node", "app.js"]

@@ -46,11 +46,31 @@ services:
           - "15672:15672"
         volumes:
           - ./rabbitmq/queue.config:/etc/rabbitmq/custom.config:ro
+    
+    agent:
+        image: newrelic-infra
+        cap_add:
+            - SYS_PTRACE
+        pid: host
+        privileged: true
+        volumes:
+            - "/:/host:ro"
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "newrelic-infra:/etc/newrelic-infra"
+        restart: unless-stopped
+        networks:
+            - virtual_nerd
+        environment:
+          local_ip: ${LOCAL_IP}
+
+
 
     backend:
         image: backend
         environment:
           local_ip: ${LOCAL_IP}
+          NEW_RELIC_APP_NAME: "backend"
+          NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
         restart: always
         networks:
             - virtual_nerd
@@ -63,6 +83,8 @@ services:
         image: mysql-service
         environment:
           local_ip: ${LOCAL_IP}
+          NEW_RELIC_APP_NAME: "mysql-service"
+          NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
         networks:
             - virtual_nerd
         ports:
@@ -78,6 +100,8 @@ services:
         image: producer
         environment:
           local_ip: ${LOCAL_IP}
+          NEW_RELIC_APP_NAME: "producer"
+          NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
         restart: always
         networks:
             - virtual_nerd
@@ -89,6 +113,8 @@ services:
         image: producerpy
         environment:
           local_ip: ${LOCAL_IP}
+          NEW_RELIC_APP_NAME: "producerpy"
+          NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
         restart: always
         networks:
             - virtual_nerd
@@ -100,6 +126,8 @@ services:
         image: consumer
         environment:
           local_ip: ${LOCAL_IP}
+          NEW_RELIC_APP_NAME: "consumer"
+          NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
         restart: always
         networks:
             - virtual_nerd
@@ -115,3 +143,4 @@ networks:
 
 volumes:
     my-db:
+    newrelic-infra:

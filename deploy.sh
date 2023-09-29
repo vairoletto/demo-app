@@ -19,4 +19,4 @@ done
 dirs_to_up=$(printf "%s " "${directories[@]}")
 
 # Run docker-compose up with directories
-docker-compose up -d --force-recreate $dirs_to_up
+docker-compose up -d --force-recreate $dirs_to_up agent

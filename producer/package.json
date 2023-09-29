@@ -8,6 +8,7 @@
       "body-parser": "^1.19.0",
       "amqplib": "^0.7.0",
       "cors": "^2.8.5",
-      "death": "^1.0.0"
+      "death": "^1.0.0",
+      "newrelic": "latest"
     }
   }

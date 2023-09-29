@@ -1,0 +1,36 @@
+integrations:
+  - name: nri-mysql
+    env:
+      HOSTNAME: db
+      PORT: 3306
+
+      # ENABLE_TLS: false
+      # INSECURE_SKIP_VERIFY: false
+
+      # Specify extra connection parameters as attr1=val1&attr2=val2.
+      # EXTRA_CONNECTION_URL_ARGS: ""
+
+      # If not empty `socket` parameter will discard `port` parameter
+      # SOCKET: <PATH_TO_LOCAL_SOCKET_FILE_NAME>
+
+      USERNAME: root
+      PASSWORD: 12345678
+
+      # Extended metrics
+      EXTENDED_METRICS: true
+      EXTENDED_INNODB_METRICS: true
+      EXTENDED_MYISAM_METRICS: true
+
+      REMOTE_MONITORING: true
+
+    # Time between consecutive executions of the integration. It must be a number followed by a time unit (s, m or h), without spaces.
+    # The default is 30s, and the minimum accepted value is 15s. Any value lower than 15s is automatically set to 15s.
+    interval: 30s
+
+    # The agent uses those labels to decorate the metrics, events, and inventory that it receives from a given integration instance.
+    labels:
+      env: production
+      role: write-replica
+
+    # Advanced: Allows overriding the category and term of the inventory source.
+    inventory_source: config/mysql
