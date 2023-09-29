@@ -5,6 +5,8 @@ import logging
 import json
 import os
 import httpx
+import newrelic.agent
+
 
 app = FastAPI()
 local_ip = os.getenv('local_ip', '10.0.0.1')
@@ -42,7 +44,9 @@ def receive_from_rabbitmq():
     if method_frame is None:
         connection.close()
         return 'EMPTY'
-    else:            
+    else:
+        #add custom attribute
+        newrelic.agent.add_custom_attribute('fromsource', QUEUE_NAME)            
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         connection.close() 
         return payload
@@ -62,7 +66,8 @@ async def post_to_submit(payload, port, path, traceparent, tracestate):
             headers['traceparent'] = traceparent
         if tracestate is not None:
             headers['tracestate'] = tracestate
-        
+
+
         response = httpx.post(url, headers=headers, json=payload)
         response.raise_for_status()
         return response.json()
@@ -115,6 +120,7 @@ async def save_and_get_from_queue():
             if 'headers' in payload:
                 traceparent = payload['headers'].get('traceparent')
                 tracestate = payload['headers'].get('tracestate')
+
 
             # Add code to post payload to http://localhost:3000/submit
             submit_response = await post_to_submit(payload, '3001', '/save', traceparent, tracestate)
